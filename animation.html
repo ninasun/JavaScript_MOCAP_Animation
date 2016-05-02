@@ -1,0 +1,150 @@
+<html>
+<head>
+<title>CS290 Final: Animating MOCAP data in the Browser</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="animator.css">
+<!--External Libraries!-->
+<!--<script type="text/javascript" src="js/gl-matrix.js"></script>!-->
+<script type="text/javascript" src = "GLEAT/js/gl-matrix-min.js"></script>
+<script type="text/javascript" src="GLEAT/js/webgl-utils.js"></script>
+<script type="text/javascript" src="GLEAT/js/webgl-debug.js"></script>
+<script type="text/javascript" src="GLEAT/js/numeric-1.2.6.min.js"></script>
+<script type="text/javascript" src="GLEAT/js/jquery-1.11.1.min.js"></script>
+<!--Plot.ly!-->
+<script src="libs/plotly.min.js"></script>
+
+<!--Our Scripts!-->
+<script src="GLEAT/Geometry/PolyMesh.js"></script>
+<script src="GLEAT/Geometry/Primitives3D.js"></script>
+<script src="GLEAT/Geometry/Cameras3D.js"></script>
+<script src="GLEAT/DrawingUtils/Shaders.js"></script>
+<script src="GLEAT/DrawingUtils/SimpleDraw.js"></script>
+<script src="GLEAT/Viewers/SimpleMeshCanvas.js"></script>
+<script src="ASFparser.js"></script>
+<script src="AMCparser.js"></script>
+<script scr="matrixMaker.js"></script>
+<script src="Trajectories.js"></script>
+<script src="Scene.js"></script>
+</head>
+
+<body>
+<div id="content">
+
+<table><tr><td>
+<canvas id="GLCanvas1" style="border: none;" width="800" height="600"></canvas>
+</td>
+
+<td>
+<table>
+<tr><td>ASF: </td><td><input type = "file" id = "asfInput"></td></tr>
+<tr><td>AMC: </td><td><input type = "file" id = "amcInput"></td></tr>
+<tr><td>Load: </td><td><button type="button" id = "load" onclick="loadAnimation()">Load</button></td></tr>
+</table>
+
+<div>Camera Pos: <div id="externalPos"></div><br></div>
+</td>
+</table>
+
+<div>
+
+</div>
+<br>
+<div>
+<button type="button" class="gui_button" id = "play" onclick="playAnimation()">Play</button>
+<button type="button" class="gui_button" id = "pause" onclick="pauseAnimation()">Pause</button>
+<button type="button" class="gui_button" id = "reset" onclick="resetAnimation()">Reset</button>
+</div> <br>
+
+<div>
+<td>Show Joints</td>
+  <label class="switch">
+    <input type="checkbox" id ="showjointstoggle">
+    <div class="slider round"></div>
+
+  </label>
+  <td>Show Bones</td>
+    <label class="switch">
+      <input type="checkbox" id="showbonestoggle">
+      <div class="slider round"></div>
+    </label>
+</div>
+
+</div>
+
+<script>
+    var glcanvas = document.getElementById("GLCanvas1");
+    glcanvas.addEventListener("contextmenu", function(e){ e.stopPropagation(); e.preventDefault(); return false; }); //Need this to disable the menu that pops up on right clicking
+    setupScene(glcanvas);
+    var AMCobj={};
+    var ASFobj={};
+
+    var asfInput = document.getElementById('asfInput');
+    asfInput.addEventListener('change', function(e) {
+        var reader = new FileReader();
+        reader.onload = function(){
+     	 var text = reader.result;
+     	 try{
+     	 	ASFobj=parseASF(text);
+     	 }
+     	 catch(error){
+     	 	alert("Error parsing ASF file.");
+                throw(error);
+     	 }
+    	};
+        reader.readAsText(asfInput.files[0]);
+    });
+
+    var amcInput = document.getElementById('amcInput');
+    amcInput.addEventListener('change', function(e) {
+        var reader = new FileReader();
+        reader.onload = function(){
+         var text = reader.result;
+         try{
+            AMCobj=parseAMC(text);
+         }
+         catch(error){
+            alert("Error parsing AMC file.");
+                throw(error);
+         }
+        };
+        reader.readAsText(amcInput.files[0]);
+    });
+
+    function loadAnimation() {
+        if(Object.keys(ASFobj).length!=0 && Object.keys(AMCobj).length!=0){
+            loadScene(ASFobj,AMCobj,glcanvas);
+        }
+    }
+
+    function playAnimation() {
+      if(Object.keys(glcanvas.scene).length!=0) {
+        animateFigure(glcanvas);
+      }
+    }
+
+    function pauseAnimation() {
+      pause();
+    }
+
+    function resetAnimation(){
+      resetScene();
+    }
+
+    var jointstoggle = document.getElementById('showjointstoggle');
+    jointstoggle.addEventListener('change', function(e) {
+        glcanvas.drawJoints = jointstoggle.checked;
+        requestAnimFrame(glcanvas.repaint);
+    });
+    jointstoggle.checked = true;
+
+    var bonestoggle = document.getElementById('showbonestoggle');
+    bonestoggle.addEventListener('change', function(e) {
+        glcanvas.drawBones = bonestoggle.checked;
+        requestAnimFrame(glcanvas.repaint);
+    });
+    bonestoggle.checked = true;
+
+</script>
+
+</body>
+</html>
