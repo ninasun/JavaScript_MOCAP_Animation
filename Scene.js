@@ -19,10 +19,6 @@ function setupScene(glcanvas) {
     requestAnimFrame(glcanvas.repaint);
 }
 
-// function loadSceneFromFile(filename, glcanvas) {
-//         setupScene( glcanvas);
-// }
-
 function loadScene(asf,amc,glcanvas){
     var scene={};
     scene.trajectories=getAllTrajectories(asf,amc)
@@ -33,17 +29,6 @@ function loadScene(asf,amc,glcanvas){
     scene.currentScene = 0;
     scene.defined = true;
     glcanvas.scene=scene;
-}
-
-
-//For debugging
-function outputSceneMeshes(node, levelStr) {
-    console.log("*" + levelStr + node.mesh);
-    if ('children' in node) {
-        for (var i = 0; i < node.children.length; i++) {
-            outputSceneMeshes(node.children[i], levelStr+"\t");
-        }
-    }
 }
 
 // controls for GUI
@@ -101,15 +86,10 @@ function updateBeaconsPos() {
 
 //A function that adds lots of fields to glcanvas for rendering the scene graph
 function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
-    // for (var i = 0; i < scene.children.length; i++) {
-    //     outputSceneMeshes(scene.children[i], "");
-    // }
 
     // //Rendering properties
      glcanvas.drawJoints = true;
      glcanvas.drawBones = true;
-    // glcanvas.drawImageSources = true;
-    // glcanvas.drawPaths = true;
 
 	glcanvas.gl = null;
 	glcanvas.lastX = 0;
@@ -125,11 +105,6 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
 	glcanvas.lightColor = vec3.fromValues(0.9, 0.9, 0.9);
 
 	//Scene and camera stuff
-    // glcanvas.scene = scene;
-    // glcanvas.scene.source.pixWidth = pixWidth;
-    // glcanvas.scene.source.pixHeight = pixHeight;
-    // glcanvas.scene.receiver.pixWidth = pixWidth;
-    // glcanvas.scene.receiver.pixHeight = pixHeight;
     glcanvas.externalCam = new FPSCamera(pixWidth, pixHeight, 0.75);
     glcanvas.externalCam.pos = vec3.fromValues(50, 40, 120);
     glcanvas.walkspeed = 20;//How many meters per second

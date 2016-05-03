@@ -80,23 +80,6 @@ function euler2quat(euler){
     return r;
 }
 
-// function rotateQuat(rad, axis){
-//     switch(axis) {
-//     case "x":
-//         var rot=quat.fromValues(Math.cos(rad/2),Math.sin(rad/2),0,0);
-//         break;
-//     case "y":
-//         var rot = quat.fromValues(Math.cos(rad/2),0,Math.sin(rad/2),0);
-//         break;
-//     case "z":
-//         var rot=quat.fromValues(Math.cos(rad/2),0,0,Math.sin(rad/2));
-//         break;
-//     default:
-//         console.log("Unknown axis")
-//     }
-//     return rot;
-// }
-
 // gets all the joint positions for all scenes
 function getAllTrajectories(asf, amc){
     var mot=convert2quat(asf,amc);
