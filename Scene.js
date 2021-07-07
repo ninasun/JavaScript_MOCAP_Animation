@@ -1,5 +1,13 @@
 //Purpose: Code to parse and render scene files
 
+const KEY_W = 87;
+const KEY_S = 83;
+const KEY_A = 65;
+const KEY_D = 68;
+const KEY_C = 67;
+const KEY_E = 69;
+
+
 //////////////////////////////////////////////////////////
 ///////         SCENE LOADING CODE              //////////
 //////////////////////////////////////////////////////////
@@ -39,10 +47,25 @@ function animateFigure(glcanvas) {
   interval = setInterval(animate, 1000/FPS);
 }
 
+function refreshIfNoKeys() {
+    let noKeysPressing = true;
+    for (let name in glcanvas.keysDown) {
+        if (Object.prototype.hasOwnProperty.call(glcanvas.keysDown, name)) {
+            if (glcanvas.keysDown[name]) {
+                noKeysPressing = false;
+                break;
+            }
+        }
+    }
+    if (noKeysPressing) {
+        requestAnimFrame(glcanvas.repaint);
+    }
+}
+
 function animate() {
   if (glcanvas.scene.currentScene < glcanvas.scene.finalScene) {
-    requestAnimFrame(glcanvas.repaint)
     glcanvas.scene.currentScene+=1;
+    refreshIfNoKeys();
   }
   if (glcanvas.scene.currentScene == glcanvas.scene.finalScene) { resetScene(); }
 }
@@ -193,13 +216,11 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
 
 	glcanvas.releaseClick = function(evt) {
 		this.dragging = false;
-		requestAnimFrame(this.repaint);
 		return false;
 	}
 
 	glcanvas.mouseOut = function(evt) {
 		this.dragging = false;
-		requestAnimFrame(this.repaint);
 		return false;
 	}
 
@@ -219,7 +240,6 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
 		var mousePos = this.getMousePos(evt);
 		this.lastX = mousePos.X;
 		this.lastY = mousePos.Y;
-		requestAnimFrame(this.repaint);
 		return false;
 	}
 
@@ -233,56 +253,61 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
 		if (this.dragging) {
 		    //Rotate camera by mouse dragging
 		    this.camera.rotateLeftRight(-dX);
-		    this.camera.rotateUpDown(-dY);
-		    requestAnimFrame(glcanvas.repaint);
+            this.camera.rotateUpDown(-dY);
+            refreshIfNoKeys();
 		}
 		return false;
     }
 
     //Keyboard handlers for camera
     glcanvas.keyDown = function(evt) {
-        if (evt.keyCode == 87) { //W
-            glcanvas.movefb = 1;
-        }
-        else if (evt.keyCode == 83) { //S
-            glcanvas.movefb = -1;
-        }
-        else if (evt.keyCode == 65) { //A
-            glcanvas.movelr = -1;
-        }
-        else if (evt.keyCode == 68) { //D
-            glcanvas.movelr = 1;
-        }
-        else if (evt.keyCode == 67) { //C
-            glcanvas.moveud = -1;
-        }
-        else if (evt.keyCode == 69) { //E
-            glcanvas.moveud = 1;
+        let newKeyDown = false;
+        let keyslist = [KEY_W, KEY_S, KEY_D, KEY_A, KEY_E, KEY_C];
+        let dirs = ['fb', 'fb', 'lr', 'lr', 'ud', 'ud'];
+        let fac = -1;
+        for (let i = 0; i < keyslist.length; i++) {
+            let key = keyslist[i];
+            fac *= -1;
+            if (evt.keyCode == key) {
+                if (!glcanvas.keysDown[key]) {
+                    newKeyDown = true;
+                    glcanvas.keysDown[key] = true;
+                    if (dirs[i] == 'fb') {
+                        glcanvas.movefb = fac;
+                    }
+                    else if (dirs[i] == 'lr') {
+                        glcanvas.movelr = fac;
+                    }
+                    else {
+                        glcanvas.moveud = fac;
+                    }
+                }
+            }
         }
         glcanvas.lastTime = (new Date()).getTime();
-        requestAnimFrame(glcanvas.repaint);
+        if (newKeyDown) {
+            requestAnimFrame(glcanvas.repaint);
+        }
     }
 
     glcanvas.keyUp = function(evt) {
-        if (evt.keyCode == 87) { //W
-            glcanvas.movefb = 0;
+        let keyslist = [KEY_W, KEY_S, KEY_D, KEY_A, KEY_E, KEY_C];
+        let dirs = ['fb', 'fb', 'lr', 'lr', 'ud', 'ud'];
+        for (let i = 0; i < keyslist.length; i++) {
+            let key = keyslist[i];
+            if (evt.keyCode == key) {
+                glcanvas.keysDown[key] = false;
+                if (dirs[i] == 'fb') {
+                    glcanvas.movefb = 0;
+                }
+                else if (dirs[i] == 'lr') {
+                    glcanvas.movelr = 0;
+                }
+                else {
+                    glcanvas.moveud = 0;
+                }
+            }
         }
-        else if (evt.keyCode == 83) { //S
-            glcanvas.movefb = 0;
-        }
-        else if (evt.keyCode == 65) { //A
-            glcanvas.movelr = 0;
-        }
-        else if (evt.keyCode == 68) { //D
-            glcanvas.movelr = 0;
-        }
-        else if (evt.keyCode == 67) { //C
-            glcanvas.moveud = 0;
-        }
-        else if (evt.keyCode == 69) { //E
-            glcanvas.moveud = 0;
-        }
-        requestAnimFrame(glcanvas.repaint);
     }
 
 	/////////////////////////////////////////////////////
@@ -299,6 +324,10 @@ function SceneCanvas(glcanvas, shadersRelPath, pixWidth, pixHeight) {
 	glcanvas.addEventListener('touchmove', glcanvas.clickerDragged);
 
     //Keyboard listener
+    glcanvas.keysDown = {};
+    for (key of [KEY_W, KEY_S, KEY_D, KEY_A, KEY_E, KEY_C]) {
+        glcanvas.keysDown[key] = false;
+    }
     var medadiv = document.getElementById('metadiv');
     document.addEventListener('keydown', glcanvas.keyDown, true);
     document.addEventListener('keyup', glcanvas.keyUp, true);

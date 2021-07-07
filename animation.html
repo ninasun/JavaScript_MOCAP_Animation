@@ -25,10 +25,27 @@
 <script scr="matrixMaker.js"></script>
 <script src="Trajectories.js"></script>
 <script src="Scene.js"></script>
+<script src="blockloader.js"></script>
 </head>
 
 <body>
 <div id="content">
+
+
+        <p>
+                <h3>Overview</h3>
+            Javascript parsing and stick figure browser animation for <a href = "https://research.cs.wisc.edu/graphics/Courses/cs-838-1999/Jeff/ASF-AMC.html">ASF/AMC MOCAP files</a>. Final project for <a href = "</a>">CS 290: 3D Digital Geometry</a> at Duke University Spring 2016.
+            </p>
+            
+            <p>
+            <h3>Project Contributors</h3> Nina Sun, Brandon Choi, and Cosi Goldstein
+            </p>
+            
+            
+            <h3>Controls</h3>
+            <p>
+            A,S,D,W,E,C to move the camera, click and drag to rotate
+            </p>
 
 <table><tr><td>
 <canvas id="GLCanvas1" style="border: none;" width="800" height="600"></canvas>
@@ -36,6 +53,21 @@
 
 <td>
 <table>
+    <tr>
+        <td colspan=2>
+            <div class="dropdown">
+                <button class="dropbtn">Preloaded Examples</button>
+                <div class="dropdown-content">
+                        <button type = "button" onclick="loadJumpingJacks()">Jumping Jacks</button>
+                        <button type = "button" onclick="loadBasketball()">Basketball Signals</button>
+                        <button type = "button" onclick="loadAcrobatics()">Acrobatics</button>
+                        <button type = "button" onclick="loadMonkey()">Monkey</button>
+                        <button type = "button" onclick="loadTeapot()">Teapot</button>
+                        <button type = "button" onclick="loadWandering()">Wandering</button>
+                </div>
+        </td>
+    </tr>
+    <tr><td colspan=2><h3>Load Your Own</h3></td></tr>
 <tr><td>ASF: </td><td><input type = "file" id = "asfInput"></td></tr>
 <tr><td>AMC: </td><td><input type = "file" id = "amcInput"></td></tr>
 <tr><td>Load: </td><td><button type="button" id = "load" onclick="loadAnimation()">Load</button></td></tr>
@@ -70,6 +102,8 @@
 </div>
 
 </div>
+
+
 
 <script>
     var glcanvas = document.getElementById("GLCanvas1");
@@ -113,8 +147,37 @@
     function loadAnimation() {
         if(Object.keys(ASFobj).length!=0 && Object.keys(AMCobj).length!=0){
             loadScene(ASFobj,AMCobj,glcanvas);
+            requestAnimFrame(glcanvas.repaint);
         }
     }
+
+    function loadPrecomputed(prefix) {
+        ASFobj = parseASF(BlockLoader.loadTxt("test_data/"+prefix+".asf"));
+        AMCobj = parseAMC(BlockLoader.loadTxt("test_data/"+prefix+".amc"));
+        loadScene(ASFobj,AMCobj,glcanvas);
+        requestAnimFrame(glcanvas.repaint);
+    }
+
+    function loadJumpingJacks() {
+        loadPrecomputed("jumpingjacks");
+    }
+    function loadBasketball() {
+        loadPrecomputed("basketball");
+    }
+    function loadAcrobatics() {
+        loadPrecomputed("acrobatics");
+    }
+    function loadMonkey() {
+        loadPrecomputed("monkey");
+    }
+    function loadTeapot() {
+        loadPrecomputed("teapot");
+    }
+    function loadWandering() {
+        loadPrecomputed("wandering");
+    }
+
+    
 
     function playAnimation() {
       if(Object.keys(glcanvas.scene).length!=0) {
